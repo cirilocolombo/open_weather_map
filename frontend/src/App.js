@@ -1,7 +1,6 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import axios from 'axios';
-require('dotenv/config');
- 
+
 function App() {
 	const [location, setLocation] = useState(false);
 	const [weather, setWeather] = useState(false);
@@ -12,7 +11,7 @@ function App() {
 			params: {
 				lat: lat,
 				lon: long,
-				appid: process.env.REACT_APP_OPEN_WHEATHER_KEY,
+				appid: process.env.REACT_APP_OPEN_WEATHER_KEY,
 				lang: 'pt',
 				units: 'metric'
 			}  
@@ -21,17 +20,23 @@ function App() {
 		setWeather(res.data);
 	}
 
+	let getIconWeather = (name) => {
+		const images = require.context('./assets', true);
+		
+		return images('./' + name + '.png');
+	}
+
 	let convertDateWeather = (date) => {
 		const unixTimestamp = date
 		const milliseconds = unixTimestamp * 1000
 		const dateObject = new Date(milliseconds)
-		const humanDateFormat = dateObject.toLocaleString() //2019-12-9 10:30:15
+		const humanDateFormat = dateObject.toLocaleString()
 
-		return humanDateFormat;
+		return humanDateFormat
 	}
 
-  useEffect(()=> {
-    navigator.geolocation.getCurrentPosition((position)=> {
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition((position) => {
 			getWeather(position.coords.latitude, position.coords.longitude);
       setLocation(true)
     })
@@ -52,16 +57,21 @@ function App() {
 	} else {
 		return (
 			<Fragment>
-				<h3>Clima em {weather['name']} agora ({weather['weather'][0]['description']})</h3>
-				<hr/>
-				<ul>
-					<li>Data: {convertDateWeather(weather['dt'])}</li>
-					<li>Temperatura atual: {weather['main']['temp']}°</li>
-					<li>Temperatura máxima: {weather['main']['temp_max']}°</li>
-					<li>Temperatura minima: {weather['main']['temp_min']}°</li>
-					<li>Pressão: {weather['main']['pressure']} hpa</li>
-					<li>Umidade: {weather['main']['humidity']}%</li>
-				</ul>
+				<div className="card">
+					{/*<img src={"http://openweathermap.org/img/wn/" + weather['weather'][0]['icon'] + "@2x.png"} alt=""/>*/}
+					<img src={getIconWeather(weather['weather'][0]['icon'])} alt=""/>
+
+					<h3>Clima em <b style={{color: '#364A7A'}}>{weather['name']}</b> agora ({weather['weather'][0]['description']})</h3>
+
+					<ul>
+						<li>Data: {convertDateWeather(weather['dt'])}</li>
+						<li>Temperatura atual: {weather['main']['temp']}°</li>
+						<li>Temperatura máxima: {weather['main']['temp_max']}°</li>
+						<li>Temperatura minima: {weather['main']['temp_min']}°</li>
+						<li>Pressão: {weather['main']['pressure']} hpa</li>
+						<li>Umidade: {weather['main']['humidity']}%</li>
+					</ul>
+				</div>
     	</Fragment>
 		);
 	}
